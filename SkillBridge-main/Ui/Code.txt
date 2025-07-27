@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillBridge - Pilot Training Optimization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .card {
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        .search-results {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .assessment-card {
+            transition: all 0.2s ease;
+        }
+        .assessment-card:hover {
+            background-color: #f0f7ff;
+        }
+        .pairing-card {
+            transition: all 0.2s ease;
+        }
+        .pairing-card:hover {
+            background-color: #f0f7ff;
+            cursor: pointer;
+        }
+        .skill-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+        .skill-filter-btn {
+            transition: all 0.2s ease;
+        }
+        .skill-filter-btn.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .report-tab {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .report-tab.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .report-content {
+            display: none;
+        }
+        .report-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-blue-800 to-indigo-900 text-white shadow-lg">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                    </svg>
+                    <h1 class="text-2xl font-bold">SkillBridge</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <input type="text" placeholder="Search..." class="bg-white/20 rounded-full py-1 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-white/50">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                            </svg>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 rounded-full bg-white text-blue-800 flex items-center justify-center font-bold">JD</div>
+                            <span class="hidden md:inline">John Doe</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="flex-grow flex flex-col">
+            <!-- Top Navigation Tabs -->
+            <div class="bg-white shadow">
+                <div class="container mx-auto px-4">
+                    <div class="flex overflow-x-auto">
+                        <button class="tab-button flex items-center space-x-2 px-6 py-4 border-b-2 border-blue-600 text-blue-600 font-medium" data-tab="dashboard">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                            </svg>
+                            <span>Dashboard</span>
+                        </button>
+                        <button class="tab-button flex items-center space-x-2 px-6 py-4 border-b-2 border-transparent text-gray-600 hover:text-gray-800 font-medium" data-tab="assessments">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                            <span>Assessments</span>
+                        </button>
+                        <button class="tab-button flex items-center space-x-2 px-6 py-4 border-b-2 border-transparent text-gray-600 hover:text-gray-800 font-medium" data-tab="reports">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <span>Training Records</span>
+                        </button>
+                        <button class="flex items-center space-x-2 px-6 py-4 border-b-2 border-transparent text-gray-600 hover:text-gray-800 font-medium">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>Settings</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <main class="flex-grow p-6 overflow-auto container mx-auto">
+                <!-- Dashboard Tab -->
+                <div id="dashboard" class="tab-content active">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                        <p class="text-gray-600">Overview of training performance and key metrics</p>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <div class="card bg-white rounded-xl shadow p-6">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Active Trainees</p>
+                                    <h3 class="text-2xl font-bold text-gray-800 mt-1">42</h3>
+                                </div>
+                                <div class="bg-blue-100 p-2 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center">
+                                <span class="text-green-500 flex items-center text-sm font-medium">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                    </svg>
+                                    8%
+                                </span>
+                                <span class="text-gray-500 text-sm ml-2">from last month</span>
+                            </div>
+                        </div>
+
+                        <div class="card bg-white rounded-xl shadow p-6">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Assessments Completed</p>
+                                    <h3 class="text-2xl font-bold text-gray-800 mt-1">187</h3>
+                                </div>
+                                <div class="bg-purple-100 p-2 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center">
+                                <span class="text-green-500 flex items-center text-sm font-medium">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                    </svg>
+                                    12%
+                                </span>
+                                <span class="text-gray-500 text-sm ml-2">from last week</span>
+                            </div>
+                        </div>
+
+                        <div class="card bg-white rounded-xl shadow p-6">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Average Score</p>
+                                    <h3 class="text-2xl font-bold text-gray-800 mt-1">84%</h3>
+                                </div>
+                                <div class="bg-green-100 p-2 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center">
+                                <span class="text-green-500 flex items-center text-sm font-medium">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                    </svg>
+                                    3%
+                                </span>
+                                <span class="text-gray-500 text-sm ml-2">from last month</span>
+                            </div>
+                        </div>
+
+                        <div class="card bg-white rounded-xl shadow p-6">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Training Hours</p>
+                                    <h3 class="text-2xl font-bold text-gray-800 mt-1">1,248</h3>
+                                </div>
+                                <div class="bg-amber-100 p-2 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center">
+                                <span class="text-red-500 flex items-center text-sm font-medium">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                    </svg>
+                                    2%
+                                </span>
+                                <span class="text-gray-500 text-sm ml-2">from last month</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Intelligent Pairing Section -->
+                    <div class="bg-white rounded-xl shadow p-6 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="font-semibold text-gray-800 text-lg">Intelligent Pairing</h3>
+                                <p class="text-gray-600 text-sm">Matching trainees with instructors based on skill gaps and expertise</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded-md">Auto-Pair</button>
+                                <button class="px-3 py-1 text-sm text-gray-500 hover:bg-gray-50 rounded-md">Manual Match</button>
+                                <button class="px-3 py-1 text-sm text-gray-500 hover:bg-gray-50 rounded-md">View All</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Pairing Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Pairing 1 -->
+                            <div class="pairing-card bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-red-100 text-red-800 flex items-center justify-center font-bold text-sm">AT</div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-800">Amanda Torres</p>
+                                            <p class="text-xs text-gray-500">Trainee Pilot</p>
+                                        </div>
+                                    </div>
+                                    <div class="bg-blue-100 p-1 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-center my-2">
+                                    <div class="w-1/3 flex flex-col items-center">
+                                        <div class="text-xs text-gray-500 mb-1">Needs help with</div>
+                                        <div class="flex flex-wrap justify-center">
+                                            <span class="skill-tag bg-red-100 text-red-700">Weather Systems</span>
+                                            <span class="skill-tag bg-amber-100 text-amber-700">Navigation</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="w-1/3 flex justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                        </svg>
+                                    </div>
+                                    
+                                    <div class="w-1/3 flex flex-col items-center">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 rounded-full bg-green-100 text-green-800 flex items-center justify-center font-bold text-sm">JD</div>
+                                            <div class="ml-2">
+                                                <p class="text-sm font-medium text-gray-800">James Davis</p>
+                                                <p class="text-xs text-gray-500">Instructor</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3 pt-3 border-t border-blue-100 flex justify-between items-center">
+                                    <div class="text-xs text-gray-500">Match Score: <span class="font-semibold text-blue-600">98%</span></div>
+                                    <div class="flex space-x-2">
+                                        <button class="px-2 py-1 text-xs bg-blue-600 text-white rounded">Schedule</button>
+                                        <button class="px-2 py-1 text-xs border border-gray-300 text-gray-600 rounded">Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Pairing 2 -->
+                            <div class="pairing-card bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-sm">RB</div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-800">Robert Brown</p>
+                                            <p class="text-xs text-gray-500">Trainee Pilot</p>
+                                        </div>
+                                    </div>
+                                    <div class="bg-blue-100 p-1 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-center my-2">
+                                    <div class="w-1/3 flex flex-col items-center">
+                                        <div class="text-xs text-gray-500 mb-1">Needs help with</div>
+                                        <div class="flex flex-wrap justify-center">
+                                            <span class="skill-tag bg-red-100 text-red-700">Emergency Proc.</span>
+                                            <span class="skill-tag bg-amber-100 text-amber-700">Decision Making</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="w-1/3 flex justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                        </svg>
+                                    </div>
+                                    
+                                    <div class="w-1/3 flex flex-col items-center">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-sm">SL</div>
+                                            <div class="ml-2">
+                                                <p class="text-sm font-medium text-gray-800">Sarah Lee</p>
+                                                <p class="text-xs text-gray-500">Instructor</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3 pt-3 border-t border-blue-100 flex justify-between items-center">
+                                    <div class="text-xs text-gray-500">Match Score: <span class="font-semibold text-blue-600">95%</span></div>
+                                    <div class="flex space-x-2">
+                                        <button class="px-2 py-1 text-xs bg-blue-600 text-white rounded">Schedule</button>
+                                        <button class="px-2 py-1 text-xs border border-gray-300 text-gray-600 rounded">Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Pairing 3 -->
+                            <div class="pairing-card bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center font-bold text-sm">MJ</div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-800">Michael Johnson</p>
+                                            <p class="text-xs text-gray-500">Trainee Pilot</p>
+                                        </div>
+                                    </div>
+                                    <div class="bg-blue-100 p-1 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-center my-2">
+                                    <div class="w-1/3 flex flex-col items-center">
+                                        <div class="text-xs text-gray-500 mb-1">Needs help with</div>
+                                        <div class="flex flex-wrap justify-center">
+                                            <span class="skill-tag bg-amber-100 text-amber-700">Flight Planning</span>
+                                            <span class="skill-tag bg-red-100 text-red-700">Regulations</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="w-1/3 flex justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                        </svg>
+                                    </div>
+                                    
+                                    <div class="w-1/3 flex flex-col items-center">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-800 flex items-center justify-center font-bold text-sm">TW</div>
+                                            <div class="ml-2">
+                                                <p class="text-sm font-medium text-gray-800">Thomas Wilson</p>
+                                                <p class="text-xs text-gray-500">Instructor</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3 pt-3 border-t border-blue-100 flex justify-between items-center">
+                                    <div class="text-xs text-gray-500">Match Score: <span class="font-semibold text-blue-600">92%</span></div>
+                                    <div class="flex space-x-2">
+                                        <button class="px-2 py-1 text-xs bg-blue-600 text-white rounded">Schedule</button>
+                                        <button class="px-2 py-1 text-xs border border-gray-300 text-gray-600 rounded">Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pairing Metrics -->
+                        <div class="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-800">12 Active Pairings</p>
+                                    <p class="text-xs text-gray-500">Currently in training sessions</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-800">87% Improvement Rate</p>
+                                    <p class="text-xs text-gray-500">In targeted skill areas</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-800">24 Hours Average</p>
+                                    <p class="text-xs text-gray-500">To reach proficiency</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-semibold text-gray-800">Training Records Status</h3>
+                                <div class="flex space-x-2">
+                                    <button class="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded-md">Weekly</button>
+                                    <button class="px-3 py-1 text-sm text-gray-500 hover:bg-gray-50 rounded-md">Monthly</button>
+                                </div>
+                            </div>
+                            <div class="h-64">
+                                <canvas id="progressChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-semibold text-gray-800">Skill Distribution</h3>
+                                <div class="flex space-x-2">
+                                    <button id="skillFilterAll" class="skill-filter-btn px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded-md active">All</button>
+                                    <button id="skillFilterTechnical" class="skill-filter-btn px-3 py-1 text-sm text-gray-500 hover:bg-gray-50 rounded-md">Technical</button>
+                                    <button id="skillFilterSoft" class="skill-filter-btn px-3 py-1 text-sm text-gray-500 hover:bg-gray-50 rounded-md">Soft Skills</button>
+                                </div>
+                            </div>
+                            <div class="h-64">
+                                <canvas id="skillsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-gray-800">Recent Activity</h3>
+                            <button class="text-blue-600 text-sm font-medium">View All</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b border-gray-200">
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trainee</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activity</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-sm">MJ</div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm font-medium text-gray-800">Michael Johnson</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Completed Navigation Assessment</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Today, 10:30 AM</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Passed</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center font-bold text-sm">SL</div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm font-medium text-gray-800">Sarah Lee</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Started Emergency Procedures Training</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Today, 9:15 AM</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">In Progress</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-sm">RB</div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm font-medium text-gray-800">Robert Brown</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Completed Flight Planning Assessment</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Yesterday, 4:45 PM</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800">Needs Review</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="w-8 h-8 rounded-full bg-red-100 text-red-800 flex items-center justify-center font-bold text-sm">AT</div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm font-medium text-gray-800">Amanda Torres</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Failed Weather Systems Quiz</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Yesterday, 2:30 PM</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">Failed</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assessments Tab -->
+                <div id="assessments" class="tab-content">
+                    <div class="mb-6 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Assessments</h2>
+                            <p class="text-gray-600">Create and manage skills and knowledge assessments</p>
+                        </div>
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Create Assessment
+                        </button>
+                    </div>
+
+                    <!-- Search and Filter -->
+                    <div class="bg-white rounded-xl shadow p-4 mb-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div class="relative flex-grow">
+                                <input type="text" placeholder="Search assessments..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <select class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option>All Types</option>
+                                    <option>Technical</option>
+                                    <option>Practical</option>
+                                    <option>Knowledge</option>
+                                </select>
+                                <select class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option>All Status</option>
+                                    <option>Active</option>
+                                    <option>Draft</option>
+                                    <option>Archived</option>
+                                </select>
+                                <button class="border border-gray-300 rounded-lg px-3 py-2 flex items-center hover:bg-gray-50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                    </svg>
+                                    More Filters
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Assessment Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="assessment-card bg-white rounded-xl shadow p-6 cursor-pointer">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Active</span>
+                                    <h3 class="text-lg font-semibold text-gray-800 mt-2">Annual</h3>
+                                </div>
+                                <div class="bg-blue-100 p-2 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Comprehensive yearly assessment covering all required pilot competencies and regulatory requirements.</p>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">25 questions</span>
+                                <span class="text-gray-500">45 minutes</span>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="flex -space-x-2">
+                                        <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-bold">42</div>
+                                    </div>
+                                    <span class="text-gray-500 text-sm ml-2">Completions</span>
+                                </div>
+                                <button class="text-blue-600 hover:text-blue-800 font-medium text-sm">View Details</button>
+                            </div>
+                        </div>
+
+                        <div class="assessment-card bg-white rounded-xl shadow p-6 cursor-pointer">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Active</span>
+                                    <h3 class="text-lg font-semibold text-gray-800 mt-2">LOFT</h3>
+                                </div>
+                                <div class="bg-red-100 p-2 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Line-Oriented Flight Training scenarios designed to evaluate crew resource management and decision-making skills.</p>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">15 scenarios</span>
+                                <span class="text-gray-500">60 minutes</span>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="flex -space-x-2">
+                                        <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-bold">38</div>
+                                    </div>
+                                    <span class="text-gray-500 text-sm ml-2">Completions</span>
+                                </div>
+                                <button class="text-blue-600 hover:text-blue-800 font-medium text-sm">View Details</button>
+                            </div>
+                        </div>
+
+                        <div class="assessment-card bg-white rounded-xl shadow p-6 cursor-pointer">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800">Draft</span>
+                                    <h3 class="text-lg font-semibold text-gray-800 mt-2">Recurrent</h3>
+                                </div>
+                                <div class="bg-amber-100 p-2 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Periodic training assessment to maintain currency and proficiency in essential pilot skills and knowledge.</p>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">30 questions</span>
+                                <span class="text-gray-500">40 minutes</span>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="flex -space-x-2">
+                                        <div class="w-6 h-6 rounded-full bg-gray-100 text-gray-800 flex items-center justify-center text-xs font-bold">0</div>
+                                    </div>
+                                    <span class="text-gray-500 text-sm ml-2">Completions</span>
+                                </div>
+                                <button class="text-blue-600 hover:text-blue-800 font-medium text-sm">Edit Draft</button>
+                            </div>
+                        </div>
+
+                        <div class="assessment-card bg-white rounded-xl shadow p-6 cursor-pointer">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Active</span>
+                                    <h3 class="text-lg font-semibold text-gray-800 mt-2">Proficiency Check</h3>
+                                </div>
+                                <div class="bg-purple-100 p-2 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Formal evaluation of pilot skills and competencies required for regulatory compliance and certification.</p>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">5 scenarios</span>
+                                <span class="text-gray-500">90 minutes</span>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="flex -space-x-2">
+                                        <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-bold">27</div>
+                                    </div>
+                                    <span class="text-gray-500 text-sm ml-2">Completions</span>
+                                </div>
+                                <button class="text-blue-600 hover:text-blue-800 font-medium text-sm">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Training Records Tab (formerly Reports) -->
+                <div id="reports" class="tab-content">
+                    <div class="mb-6 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Training Records</h2>
+                            <p class="text-gray-600">Analyze training data and generate insights</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                Export
+                            </button>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                New Record
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Report Filters -->
+                    <div class="bg-white rounded-xl shadow p-4 mb-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div class="flex flex-wrap gap-2">
+                                <select class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option>Last 30 Days</option>
+                                    <option>Last Quarter</option>
+                                    <option>Last Year</option>
+                                    <option>Custom Range</option>
+                                </select>
+                                <select class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option>All Trainees</option>
+                                    <option>Active Trainees</option>
+                                    <option>Completed Training</option>
+                                </select>
+                                <select class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option>All Assessments</option>
+                                    <option>Technical</option>
+                                    <option>Practical</option>
+                                    <option>Knowledge</option>
+                                </select>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="border border-gray-300 rounded-lg px-3 py-2 flex items-center hover:bg-gray-50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                    </svg>
+                                    More Filters
+                                </button>
+                                <button class="border border-gray-300 rounded-lg px-3 py-2 flex items-center hover:bg-gray-50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Captain Profile and Reports Section -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                        <!-- Captain Profile -->
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-16 h-16 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-xl">JD</div>
+                                <div class="ml-4">
+                                    <h3 class="text-xl font-bold text-gray-800">Capt. John Doe</h3>
+                                    <p class="text-gray-600">Boeing 777-300ER</p>
+                                </div>
+                            </div>
+                            
+                            <div class="border-t border-gray-200 pt-4 mt-4">
+                                <div class="grid grid-cols-1 gap-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Joined Date:</span>
+                                        <span class="font-medium text-gray-800">March 15, 2010</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Years of Experience:</span>
+                                        <span class="font-medium text-gray-800">14 years</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Total Flight Hours:</span>
+                                        <span class="font-medium text-gray-800">12,450 hours</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border-t border-gray-200 pt-4 mt-4">
+                                <h4 class="font-medium text-gray-800 mb-2">Qualifications</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">B777 Type Rating</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">B787 Type Rating</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">ETOPS</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">Cat III</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">TRI/TRE</span>
+                                </div>
+                            </div>
+                            
+                            <div class="border-t border-gray-200 pt-4 mt-4">
+                                <h4 class="font-medium text-gray-800 mb-2">Current Status</h4>
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                                    <span class="text-green-700 font-medium">Active</span>
+                                </div>
+                                <p class="text-gray-600 text-sm mt-1">Next check due in 45 days</p>
+                            </div>
+                        </div>
+
+                        <!-- Reports Section -->
+                        <div class="lg:col-span-2 bg-white rounded-xl shadow">
+                            <!-- Report Tabs -->
+                            <div class="flex border-b border-gray-200">
+                                <button class="report-tab px-4 py-3 text-sm font-medium text-blue-600 border-b-2 border-blue-600 active" data-report="annual">Annual Check</button>
+                                <button class="report-tab px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-800" data-report="proficiency">Proficiency Check</button>
+                                <button class="report-tab px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-800" data-report="recurrent">Recurrent Report</button>
+                                <button class="report-tab px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-800" data-report="history">Training History</button>
+                            </div>
+                            
+                            <!-- Report Content -->
+                            <div class="p-6">
+                                <!-- Annual Check Report -->
+                                <div id="annual-report" class="report-content active">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Performance Summary -->
+                                        <div>
+                                            <h3 class="font-semibold text-gray-800 mb-4">Performance Summary</h3>
+                                            <div class="space-y-4">
+                                                <div>
+                                                    <div class="flex justify-between mb-1">
+                                                        <span class="text-sm font-medium text-gray-700">Technical Knowledge</span>
+                                                        <span class="text-sm font-medium text-gray-700">92%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-blue-600 h-2 rounded-full" style="width: 92%"></div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="flex justify-between mb-1">
+                                                        <span class="text-sm font-medium text-gray-700">Flight Operations</span>
+                                                        <span class="text-sm font-medium text-gray-700">88%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-blue-600 h-2 rounded-full" style="width: 88%"></div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="flex justify-between mb-1">
+                                                        <span class="text-sm font-medium text-gray-700">Emergency Procedures</span>
+                                                        <span class="text-sm font-medium text-gray-700">95%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-blue-600 h-2 rounded-full" style="width: 95%"></div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="flex justify-between mb-1">
+                                                        <span class="text-sm font-medium text-gray-700">CRM</span>
+                                                        <span class="text-sm font-medium text-gray-700">90%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-blue-600 h-2 rounded-full" style="width: 90%"></div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="flex justify-between mb-1">
+                                                        <span class="text-sm font-medium text-gray-700">Overall Rating</span>
+                                                        <span class="text-sm font-medium text-gray-700">91%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-green-600 h-2 rounded-full" style="width: 91%"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-6">
+                                                <h4 class="font-medium text-gray-800 mb-2">Examiner Comments</h4>
+                                                <p class="text-gray-600 text-sm">Captain Doe demonstrated excellent technical knowledge and operational skills during the annual check. His decision-making was sound and CRM skills were effectively applied throughout all scenarios. Recommended to continue as line instructor.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Check Details -->
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <h3 class="font-semibold text-gray-800 mb-4">Check Details</h3>
+                                            <div class="space-y-3">
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Check Date:</span>
+                                                    <span class="font-medium text-gray-800">March 10, 2023</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Examiner:</span>
+                                                    <span class="font-medium text-gray-800">Capt. Robert Wilson</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Aircraft Type:</span>
+                                                    <span class="font-medium text-gray-800">B777-300ER</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Duration:</span>
+                                                    <span class="font-medium text-gray-800">4 hours</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Result:</span>
+                                                    <span class="font-medium text-green-600">Passed</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Next Due Date:</span>
+                                                    <span class="font-medium text-gray-800">March 10, 2024</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-6">
+                                                <h4 class="font-medium text-gray-800 mb-2">Areas of Excellence</h4>
+                                                <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                                    <li>Emergency procedures execution</li>
+                                                    <li>Crew coordination during abnormal situations</li>
+                                                    <li>Technical systems knowledge</li>
+                                                </ul>
+                                            </div>
+                                            
+                                            <div class="mt-4">
+                                                <h4 class="font-medium text-gray-800 mb-2">Areas for Improvement</h4>
+                                                <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                                    <li>Briefing thoroughness during high workload</li>
+                                                    <li>Fuel management optimization</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Proficiency Check Report -->
+                                <div id="proficiency-report" class="report-content">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Performance Summary -->
+                                        <div>
+                                            <h3 class="font-semibold text-gray-800 mb-4">Performance Summary</h3>
+                                            <div class="space-y-4">
+                                                <div>
+                                                    <div class="flex justify-between mb-1">
+                                                        <span class="text-sm font-medium text-gray-700">Manual Flying Skills</span>
+                                                        <span class="text-sm font-medium text-gray-700">89%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-blue-600 h-2 rounded-full" style="width: 89%"></div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="flex justify-between mb-1">
+                                                        <span class="text-sm font-medium text-gray-700">Instrument Procedures</span>
+                                                        <span class="text-sm font-medium text-gray-700">94%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-blue-600 h-2 rounded-full" style="width: 94%"></div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="flex justify-between mb-1">
+                                                        <span class="text-sm font-medium text-gray-700">Non-normal Procedures</span>
+                                                        <span class="text-sm font-medium text-gray-700">92%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-blue-600 h-2 rounded-full" style="width: 92%"></div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="flex justify-between mb-1">
+                                                        <span class="text-sm font-medium text-gray-700">Decision Making</span>
+                                                        <span class="text-sm font-medium text-gray-700">87%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-blue-600 h-2 rounded-full" style="width: 87%"></div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="flex justify-between mb-1">
+                                                        <span class="text-sm font-medium text-gray-700">Overall Rating</span>
+                                                        <span class="text-sm font-medium text-gray-700">90%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-green-600 h-2 rounded-full" style="width: 90%"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-6">
+                                                <h4 class="font-medium text-gray-800 mb-2">Examiner Comments</h4>
+                                                <p class="text-gray-600 text-sm">Captain Doe handled all simulator scenarios professionally with good situational awareness. Demonstrated strong technical skills and effective use of automation. Excellent handling of the engine failure scenario with proper execution of all required procedures.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Check Details -->
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <h3 class="font-semibold text-gray-800 mb-4">Check Details</h3>
+                                            <div class="space-y-3">
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Check Date:</span>
+                                                    <span class="font-medium text-gray-800">September 15, 2023</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Examiner:</span>
+                                                    <span class="font-medium text-gray-800">Capt. Michael Chen</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Aircraft Type:</span>
+                                                    <span class="font-medium text-gray-800">B777-300ER (Simulator)</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Duration:</span>
+                                                    <span class="font-medium text-gray-800">4.5 hours</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Result:</span>
+                                                    <span class="font-medium text-green-600">Passed</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Next Due Date:</span>
+                                                    <span class="font-medium text-gray-800">March 15, 2024</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-6">
+                                                <h4 class="font-medium text-gray-800 mb-2">Scenarios Tested</h4>
+                                                <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                                    <li>Engine failure during takeoff</li>
+                                                    <li>Rejected takeoff</li>
+                                                    <li>Hydraulic system failure</li>
+                                                    <li>CAT III approach with system degradation</li>
+                                                    <li>Windshear recovery</li>
+                                                </ul>
+                                            </div>
+                                            
+                                            <div class="mt-4">
+                                                <h4 class="font-medium text-gray-800 mb-2">Recommendations</h4>
+                                                <p class="text-sm text-gray-600">Continue to focus on manual flying skills during cruise phase to maintain proficiency. Review updated procedures for dual hydraulic system failures.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Recurrent Report -->
+                                <div id="recurrent-report" class="report-content">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Performance Summary -->
+                                        <div>
+                                            <h3 class="font-semibold text-gray-800 mb-4">Performance Summary</h3>
+                                            <div class="space-y-4">
+                                                <div>
+                                                    <div class="flex justify-between mb-1">
+                                                        <span class="text-sm font-medium text-gray-700">Systems Knowledge</span>
+                                                        <span class="text-sm font-medium text-gray-700">96%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-blue-600 h-2 rounded-full" style="width: 96%"></div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="flex justify-between mb-1">
+                                                        <span class="text-sm font-medium text-gray-700">SOPs</span>
+                                                        <span class="text-sm font-medium text-gray-700">93%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-blue-600 h-2 rounded-full" style="width: 93%"></div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="flex justify-between mb-1">
+                                                        <span class="text-sm font-medium text-gray-700">Regulations</span>
+                                                        <span class="text-sm font-medium text-gray-700">91%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-blue-600 h-2 rounded-full" style="width: 91%"></div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="flex justify-between mb-1">
+                                                        <span class="text-sm font-medium text-gray-700">Safety Procedures</span>
+                                                        <span class="text-sm font-medium text-gray-700">95%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-blue-600 h-2 rounded-full" style="width: 95%"></div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="flex justify-between mb-1">
+                                                        <span class="text-sm font-medium text-gray-700">Overall Rating</span>
+                                                        <span class="text-sm font-medium text-gray-700">94%</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-green-600 h-2 rounded-full" style="width: 94%"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-6">
+                                                <h4 class="font-medium text-gray-800 mb-2">Instructor Comments</h4>
+                                                <p class="text-gray-600 text-sm">Captain Doe shows excellent knowledge retention and application of procedures. Particularly strong in systems knowledge and safety procedures. Actively participated in all discussions and demonstrated thorough understanding of recent regulatory changes.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Check Details -->
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <h3 class="font-semibold text-gray-800 mb-4">Check Details</h3>
+                                            <div class="space-y-3">
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Check Date:</span>
+                                                    <span class="font-medium text-gray-800">December 5, 2023</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Examiner:</span>
+                                                    <span class="font-medium text-gray-800">Capt. Sarah Johnson</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Aircraft Type:</span>
+                                                    <span class="font-medium text-gray-800">B777-300ER (Ground Training)</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Duration:</span>
+                                                    <span class="font-medium text-gray-800">3 days</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Result:</span>
+                                                    <span class="font-medium text-green-600">Completed</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Next Due Date:</span>
+                                                    <span class="font-medium text-gray-800">December 5, 2024</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-6">
+                                                <h4 class="font-medium text-gray-800 mb-2">Training Modules Completed</h4>
+                                                <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                                    <li>Updated MEL procedures</li>
+                                                    <li>New weather radar system</li>
+                                                    <li>Revised fuel policy</li>
+                                                    <li>Security procedures update</li>
+                                                    <li>Human factors refresher</li>
+                                                </ul>
+                                            </div>
+                                            
+                                            <div class="mt-4">
+                                                <h4 class="font-medium text-gray-800 mb-2">Additional Notes</h4>
+                                                <p class="text-sm text-gray-600">Captain Doe volunteered to assist in developing training materials for the new weather radar system based on his extensive experience.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Training History -->
+                                <div id="history-report" class="report-content">
+                                    <h3 class="font-semibold text-gray-800 mb-4">Training History</h3>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full">
+                                            <thead>
+                                                <tr class="border-b border-gray-200">
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Training Type</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aircraft</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Instructor</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Result</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-gray-200">
+                                                <tr>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Dec 5, 2023</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Recurrent Training</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">B777-300ER</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Capt. Sarah Johnson</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap">
+                                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Completed</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Sep 15, 2023</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Proficiency Check</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">B777-300ER</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Capt. Michael Chen</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap">
+                                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Passed</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Mar 10, 2023</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Annual Check</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">B777-300ER</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Capt. Robert Wilson</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap">
+                                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Passed</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Dec 8, 2022</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Recurrent Training</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">B777-300ER</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Capt. Jennifer Lee</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap">
+                                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Completed</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Sep 20, 2022</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Proficiency Check</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">B777-300ER</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Capt. David Thompson</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap">
+                                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Passed</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Mar 15, 2022</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Annual Check</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">B777-300ER</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Capt. Robert Wilson</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap">
+                                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Passed</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Jun 10, 2021</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">B787 Cross-Qualification</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">B787-9</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Capt. Thomas Garcia</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap">
+                                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Qualified</span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+                                        <h4 class="font-medium text-gray-800 mb-2">Training Summary</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div class="bg-white p-3 rounded-lg border border-gray-200">
+                                                <div class="text-center">
+                                                    <div class="text-3xl font-bold text-blue-600">24</div>
+                                                    <div class="text-sm text-gray-600">Total Training Events</div>
+                                                </div>
+                                            </div>
+                                            <div class="bg-white p-3 rounded-lg border border-gray-200">
+                                                <div class="text-center">
+                                                    <div class="text-3xl font-bold text-green-600">100%</div>
+                                                    <div class="text-sm text-gray-600">Pass Rate</div>
+                                                </div>
+                                            </div>
+                                            <div class="bg-white p-3 rounded-lg border border-gray-200">
+                                                <div class="text-center">
+                                                    <div class="text-3xl font-bold text-purple-600">3</div>
+                                                    <div class="text-sm text-gray-600">Aircraft Types</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Saved Reports -->
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-gray-800">Saved Records</h3>
+                            <button class="text-blue-600 text-sm font-medium">Manage Records</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b border-gray-200">
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Record Name</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Run</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-800">Monthly Performance Summary</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Performance</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">May 1, 2023</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Today, 8:30 AM</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                            <div class="flex space-x-2">
+                                                <button class="text-blue-600 hover:text-blue-800">Run</button>
+                                                <button class="text-gray-600 hover:text-gray-800">Edit</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-800">Assessment Completion Rates</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Assessment</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Apr 15, 2023</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Yesterday, 2:15 PM</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                            <div class="flex space-x-2">
+                                                <button class="text-blue-600 hover:text-blue-800">Run</button>
+                                                <button class="text-gray-600 hover:text-gray-800">Edit</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-800">Training Efficiency Analysis</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Efficiency</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Mar 22, 2023</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">Last week</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                            <div class="flex space-x-2">
+                                                <button class="text-blue-600 hover:text-blue-800">Run</button>
+                                                <button class="text-gray-600 hover:text-gray-800">Edit</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Tab Switching
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    
+                    // Update active tab button
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('border-blue-600', 'text-blue-600');
+                        btn.classList.add('border-transparent', 'text-gray-600', 'hover:text-gray-800');
+                    });
+                    button.classList.remove('border-transparent', 'text-gray-600', 'hover:text-gray-800');
+                    button.classList.add('border-blue-600', 'text-blue-600');
+                    
+                    // Show active tab content
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Report Tab Switching
+            const reportTabs = document.querySelectorAll('.report-tab');
+            const reportContents = document.querySelectorAll('.report-content');
+            
+            reportTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const reportId = tab.getAttribute('data-report');
+                    
+                    // Update active report tab
+                    reportTabs.forEach(t => {
+                        t.classList.remove('active', 'text-blue-600', 'border-b-2', 'border-blue-600', 'bg-blue-600', 'text-white');
+                        t.classList.add('text-gray-600', 'hover:text-gray-800');
+                    });
+                    tab.classList.remove('text-gray-600', 'hover:text-gray-800');
+                    tab.classList.add('active', 'text-white', 'bg-blue-600');
+                    
+                    // Show active report content
+                    reportContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(reportId + '-report').classList.add('active');
+                });
+            });
+            
+            // Initialize Charts
+            initCharts();
+        });
+        
+        // Charts Initialization
+        function initCharts() {
+            // Training Records Status Chart (Submitted vs Pending)
+            const progressCtx = document.getElementById('progressChart');
+            if (progressCtx) {
+                new Chart(progressCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [
+                            {
+                                label: 'Records Submitted',
+                                data: [65, 78, 82, 75, 92, 85],
+                                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                                borderColor: '#3b82f6',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Records Pending',
+                                data: [15, 12, 8, 18, 5, 10],
+                                backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                                borderColor: '#ef4444',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                stacked: false,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Records'
+                                },
+                                grid: {
+                                    display: true,
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            x: {
+                                stacked: false,
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Define skill data sets
+            const technicalSkills = {
+                labels: ['Handling', 'Navigation', 'Emergency Procedures'],
+                datasets: [{
+                    label: 'Technical Skills',
+                    data: [78, 65, 82],
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: '#3b82f6',
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#3b82f6'
+                }]
+            };
+            
+            const softSkills = {
+                labels: ['ADM', 'CRM', 'SOPs', 'GOM'],
+                datasets: [{
+                    label: 'Soft Skills',
+                    data: [85, 72, 90, 68],
+                    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                    borderColor: '#8b5cf6',
+                    pointBackgroundColor: '#8b5cf6',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#8b5cf6'
+                }]
+            };
+            
+            const allSkills = {
+                labels: ['Handling', 'Navigation', 'Emergency Procedures', 'ADM', 'CRM', 'SOPs', 'GOM'],
+                datasets: [{
+                    label: 'All Skills',
+                    data: [78, 65, 82, 85, 72, 90, 68],
+                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                    borderColor: '#6366f1',
+                    pointBackgroundColor: '#6366f1',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#6366f1'
+                }]
+            };
+            
+            // Skills Chart
+            let skillsChart;
+            const skillsCtx = document.getElementById('skillsChart');
+            if (skillsCtx) {
+                skillsChart = new Chart(skillsCtx, {
+                    type: 'radar',
+                    data: allSkills,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true
+                            }
+                        },
+                        animation: {
+                            duration: 500
+                        }
+                    }
+                });
+                
+                // Add event listeners for skill filter buttons
+                document.getElementById('skillFilterAll').addEventListener('click', function() {
+                    updateSkillChart('all');
+                });
+                
+                document.getElementById('skillFilterTechnical').addEventListener('click', function() {
+                    updateSkillChart('technical');
+                });
+                
+                document.getElementById('skillFilterSoft').addEventListener('click', function() {
+                    updateSkillChart('soft');
+                });
+            }
+            
+            // Function to update the skill chart based on filter
+            function updateSkillChart(filter) {
+                // Update active button styling
+                document.querySelectorAll('.skill-filter-btn').forEach(btn => {
+                    btn.classList.remove('active', 'bg-blue-50', 'text-blue-600', 'bg-blue-600', 'text-white');
+                    btn.classList.add('text-gray-500', 'hover:bg-gray-50');
+                });
+                
+                let activeBtn;
+                let chartData;
+                
+                if (filter === 'technical') {
+                    activeBtn = document.getElementById('skillFilterTechnical');
+                    chartData = technicalSkills;
+                } else if (filter === 'soft') {
+                    activeBtn = document.getElementById('skillFilterSoft');
+                    chartData = softSkills;
+                } else {
+                    activeBtn = document.getElementById('skillFilterAll');
+                    chartData = allSkills;
+                }
+                
+                activeBtn.classList.remove('text-gray-500', 'hover:bg-gray-50');
+                activeBtn.classList.add('active', 'bg-blue-600', 'text-white');
+                
+                // Update chart data
+                skillsChart.data = chartData;
+                skillsChart.update();
+            }
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96540833a37d7883',t:'MTc1MzUzNDMyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

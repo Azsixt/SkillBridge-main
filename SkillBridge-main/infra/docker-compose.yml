@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: skillbridge
+      POSTGRES_PASSWORD: skillbridgepass
+      POSTGRES_DB: skillbridge
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  backend:
+    build: ../backend
+    command: npx ts-node src/index.ts
+    volumes:
+      - ../backend:/app
+    environment:
+      DATABASE_URL: postgres://skillbridge:skillbridgepass@db:5432/skillbridge
+    ports:
+      - '4000:4000'
+    depends_on:
+      - db
+
+  frontend:
+    build: ../frontend
+    stdin_open: true
+    tty: true
+    volumes:
+      - ../frontend:/app
+    ports:
+      - '3000:3000'
+    depends_on:
+      - backend 

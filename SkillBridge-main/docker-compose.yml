@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: skillbridge
+      POSTGRES_PASSWORD: skillbridgepass
+      POSTGRES_DB: skillbridge
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - skillbridge-network
+
+  # Backend API
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      DATABASE_URL: postgres://skillbridge:skillbridgepass@db:5432/skillbridge
+      PORT: 4000
+    ports:
+      - '4000:4000'
+    depends_on:
+      - db
+    networks:
+      - skillbridge-network
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  # Frontend React App
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
+    stdin_open: true
+    tty: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - '3000:3000'
+    depends_on:
+      - backend
+    networks:
+      - skillbridge-network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+# Persistent volume for PostgreSQL data
+volumes:
+  postgres_data:
+    driver: local
+
+# Network for service communication
+networks:
+  skillbridge-network:
+    driver: bridge 
